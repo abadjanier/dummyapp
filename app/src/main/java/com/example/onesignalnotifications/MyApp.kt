@@ -2,10 +2,17 @@ package com.example.onesignalnotifications
 
 import android.app.Application
 import com.onesignal.OneSignal
-import com.onesignal.OneSignal.ExternalIdError
-import com.onesignal.OneSignal.OSExternalUserIdUpdateCompletionHandler
+
+import com.onesignal.debug.LogLevel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
+import java.security.MessageDigest
+import java.util.Base64
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 
 // NOTE: Replace the below with your own ONESIGNAL_APP_ID
@@ -16,97 +23,107 @@ class MyApp: Application() {
         super.onCreate()
 
         // Verbose Logging set to help debug issues, remove before releasing your app.
-        //OneSignal.Debug.logLevel = LogLevel.VERBOSE
+        OneSignal.Debug.logLevel = LogLevel.VERBOSE
 
         // OneSignal Initialization
-       // OneSignal.initWithContext(this, ONESIGNAL_APP_ID)
+        OneSignal.initWithContext(this, ONESIGNAL_APP_ID)
   //      OneSignal.login("17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4");
 
 
 //        OneSignal.User.addAlias("external_id","17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4")
         //OneSignal.User.setLanguage("ru")
-        //OneSignal.login("17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4")
+       // OneSignal.login("17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4")
 
         // requestPermission will show the native Android notification permission prompt.
         // NOTE: It's recommended to use a OneSignal In-App Message to prompt instead.
-       // CoroutineScope(Dispatchers.IO).launch {
-       //     OneSignal.Notifications.requestPermission(true)
-      //  }
-
-        //OneSignal.login("17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4")
-
-
+        CoroutineScope(Dispatchers.IO).launch {
+            OneSignal.Notifications.requestPermission(true)
+        }
 
 
         // OneSignal Initialization
         OneSignal.initWithContext(this)
-        OneSignal.setAppId(ONESIGNAL_APP_ID)
+       // OneSignal.setAppId(ONESIGNAL_APP_ID)
+        //val externalUserId = "17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4"
+
+        //OneSignal.login("17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4",this.hmacSha256("NGM5OWRmNDgtNGNkZi00MjU3LWEwZmUtOTAxN2QwNGEyNjhj", externalUserId))
+
+
 
         // promptForPushNotifications will show the native Android notification permission prompt.
         // We recommend removing the following code and instead using an In-App Message to prompt for notification permission (See step 7)
-        OneSignal.promptForPushNotifications()
-        OneSignal.removeExternalUserId()
-        OneSignal.setExternalUserId("17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4")
-        OneSignal.sendTag("external_id","17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4")
+        //OneSignal.promptForPushNotifications()
+        //OneSignal.setExternalUserId("17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4")
+        //OneSignal.sendTag("external_id","17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4")
 
-        val externalUserId =
-            "17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4" // You will supply the external user id to the OneSignal SDK
+        //val externalUserId = "17cd9429-7e6c-4bc2-8aeb-6c65d62fe8a4" // You will supply the external user id to the OneSignal SDK
 
 
 // Setting External User Id with Callback Available in SDK Version 4.0.0+
 
 // Setting External User Id with Callback Available in SDK Version 4.0.0+
-        OneSignal.setExternalUserId(
-            externalUserId,
-            object : OSExternalUserIdUpdateCompletionHandler {
-                override fun onSuccess(results: JSONObject) {
-                    try {
-                        if (results.has("push") && results.getJSONObject("push").has("success")) {
-                            val isPushSuccess = results.getJSONObject("push").getBoolean("success")
-                            OneSignal.onesignalLog(
-                                OneSignal.LOG_LEVEL.VERBOSE,
-                                "Set external user id for push status: $isPushSuccess"
-                            )
-                        }
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
-                    try {
-                        if (results.has("email") && results.getJSONObject("email").has("success")) {
-                            val isEmailSuccess =
-                                results.getJSONObject("email").getBoolean("success")
-                            OneSignal.onesignalLog(
-                                OneSignal.LOG_LEVEL.VERBOSE,
-                                "Set external user id for email status: $isEmailSuccess"
-                            )
-                        }
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
-                    try {
-                        if (results.has("sms") && results.getJSONObject("sms").has("success")) {
-                            val isSmsSuccess = results.getJSONObject("sms").getBoolean("success")
-                            OneSignal.onesignalLog(
-                                OneSignal.LOG_LEVEL.VERBOSE,
-                                "Set external user id for sms status: $isSmsSuccess"
-                            )
-                        }
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
-                }
+//        val hash = this.hmacSha256("NGM5OWRmNDgtNGNkZi00MjU3LWEwZmUtOTAxN2QwNGEyNjhj", externalUserId)
+//        OneSignal.setExternalUserId(
+//            externalUserId,
+//            hash
+//            ,
+//            object : OSExternalUserIdUpdateCompletionHandler {
+//                override fun onSuccess(results: JSONObject) {
+//                    try {
+//                        if (results.has("push") && results.getJSONObject("push").has("success")) {
+//                            val isPushSuccess = results.getJSONObject("push").getBoolean("success")
+//                            OneSignal.onesignalLog(
+//                                OneSignal.LOG_LEVEL.VERBOSE,
+//                                "Set external user id for push status: $isPushSuccess"
+//                            )
+//                        }
+//                    } catch (e: JSONException) {
+//                        e.printStackTrace()
+//                    }
+//                    try {
+//                        if (results.has("email") && results.getJSONObject("email").has("success")) {
+//                            val isEmailSuccess =
+//                                results.getJSONObject("email").getBoolean("success")
+//                            OneSignal.onesignalLog(
+//                                OneSignal.LOG_LEVEL.VERBOSE,
+//                                "Set external user id for email status: $isEmailSuccess"
+//                            )
+//                        }
+//                    } catch (e: JSONException) {
+//                        e.printStackTrace()
+//                    }
+//                    try {
+//                        if (results.has("sms") && results.getJSONObject("sms").has("success")) {
+//                            val isSmsSuccess = results.getJSONObject("sms").getBoolean("success")
+//                            OneSignal.onesignalLog(
+//                                OneSignal.LOG_LEVEL.VERBOSE,
+//                                "Set external user id for sms status: $isSmsSuccess"
+//                            )
+//                        }
+//                    } catch (e: JSONException) {
+//                        e.printStackTrace()
+//                    }
+//                }
+//
+//                override fun onFailure(error: ExternalIdError) {
+//                    // The results will contain channel failure statuses
+//                    // Use this to detect if external_user_id was not set and retry when a better network connection is made
+//                    OneSignal.onesignalLog(
+//                        OneSignal.LOG_LEVEL.VERBOSE,
+//                        "Set external user id done with error: $error"
+//                    )
+//                }
+//            })
 
-                override fun onFailure(error: ExternalIdError) {
-                    // The results will contain channel failure statuses
-                    // Use this to detect if external_user_id was not set and retry when a better network connection is made
-                    OneSignal.onesignalLog(
-                        OneSignal.LOG_LEVEL.VERBOSE,
-                        "Set external user id done with error: $error"
-                    )
-                }
-            })
 
+    }
 
+    private fun hmacSha256(key: String, data: String): String {
+        val secretKey = SecretKeySpec(key.toByteArray(Charsets.UTF_8), "HmacSHA256")
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(secretKey)
+        val hmacData = mac.doFinal(data.toByteArray(Charsets.UTF_8))
+        return Base64.getEncoder().encodeToString(hmacData)
     }
 
 }
